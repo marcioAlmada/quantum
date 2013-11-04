@@ -9,7 +9,7 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->QuantumObject = new Object(function(){ return new \stdClass; });
+        $this->QuantumObject = new Object(function () { return new \stdClass; });
     }
 
     public function tearDown()
@@ -40,8 +40,8 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
      */
     public function exposeCreatesParallelInstances()
     {
-        $alpha = $this->QuantumObject->expose('alpha')->detach();
-        $beta  = $this->QuantumObject->expose('beta')->detach();
+        $alpha = $this->QuantumObject->mount('alpha')->detach();
+        $beta  = $this->QuantumObject->mount('beta')->detach();
         $this->assertNotSame($alpha, $beta);
     }
 
@@ -52,9 +52,9 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
     {
         $alpha =
             $this->QuantumObject
-                ->expose('alpha')
+                ->mount('alpha')
                     ->interact(
-                        function($instance){
+                        function ($instance) {
                             $instance->foo = 'bar';
                         }
                     )
@@ -63,9 +63,9 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
 
         $beta =
             $this->QuantumObject
-                ->expose('beta')
+                ->mount('beta')
                     ->interact(
-                        function($instance){
+                        function ($instance) {
                             $instance->foo = 'baz';
                         }
                     )
@@ -81,25 +81,25 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
     public function eachAffectsStateByReference()
     {
         $this->QuantumObject
-            ->expose('alpha')
+            ->mount('alpha')
                 ->interact(
-                    function($instance){
+                    function ($instance) {
                         $instance->foo = 'bar';
                     }
                 )
-            ->expose('beta')
+            ->mount('beta')
                 ->interact(
-                    function($instance){
+                    function ($instance) {
                         $instance->foo = 'baz';
                     }
                 )
-            ->each(function($identifier, $state){
+            ->each(function ($identifier, $state) {
                 $state->property = 'value';
             })
         ;
 
-        $alpha = $this->QuantumObject->expose('alpha')->detach();
-        $beta  = $this->QuantumObject->expose('beta')->detach();
+        $alpha = $this->QuantumObject->mount('alpha')->detach();
+        $beta  = $this->QuantumObject->mount('beta')->detach();
 
         $this->assertSame($alpha->property, $beta->property);
     }
@@ -110,20 +110,20 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
     public function eachPreservesCurrentStatePointer()
     {
         $this->QuantumObject
-            ->expose('alpha')
-                ->interact(function ($letter){
+            ->mount('alpha')
+                ->interact(function ($letter) {
                     $letter->position = 'first';
-                }) 
-            ->expose('beta')
-                ->interact(function ($letter){
+                })
+            ->mount('beta')
+                ->interact(function ($letter) {
                     $letter->position = 'second';
-                }) 
-            ->expose('gama')
-                ->interact(function ($letter){
+                })
+            ->mount('gama')
+                ->interact(function ($letter) {
                     $letter->position = 'third';
-                }) 
-            ->expose('beta') # back to beta
-            ->each(function($identifier, $state){}) # looping trough states (doing nothing)
+                })
+            ->mount('beta') # back to beta
+            ->each(function ($identifier, $state) {}) # just looping trough states
         ;
         $this->assertEquals('second', $this->QuantumObject->detach()->position);
     }
@@ -133,8 +133,12 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
      */
     public function eachCantTaintStatesIdentifiers()
     {
-        $this->QuantumObject->expose('alpha')->expose('beta')->expose('gama')->each(function($identifiers, $state){
-            $identifiers = 'delta';
+        $this->QuantumObject
+        ->mount('alpha')
+        ->mount('beta')
+        ->mount('gama')
+        ->each(function ($identifiers, $state) {
+                $identifiers = 'delta';
         });
 
         $this->assertSame(['alpha', 'beta', 'gama'], $this->QuantumObject->states());
@@ -145,27 +149,25 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
      */
     public function detachReturnsReferences()
     {
-        $alpha = $this->QuantumObject->expose('alpha')->detach();
-        $this->assertSame($alpha, $this->QuantumObject->expose('alpha')->detach());
-
+        # structures
+        $alpha = $this->QuantumObject->mount('alpha')->detach();
+        $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->detach());
         $alpha->position = 'first';
-        $this->assertSame($alpha->position, $this->QuantumObject->expose('alpha')->detach()->position);
+        $this->assertSame($alpha->position, $this->QuantumObject->mount('alpha')->detach()->position);
 
-        $this->QuantumObject = new Object(function(){ return []; });
-
-        $alpha = &$this->QuantumObject->expose('alpha')->detach();
-        $this->assertSame($alpha, $this->QuantumObject->expose('alpha')->detach());
-
+        # arrays
+        $this->QuantumObject = new Object(function () { return []; });
+        $alpha = &$this->QuantumObject->mount('alpha')->detach();
+        $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->detach());
         $alpha['position'] = 'first';
-        $this->assertSame($alpha['position'], $this->QuantumObject->expose('alpha')->detach()['position']);
+        $this->assertSame($alpha['position'], $this->QuantumObject->mount('alpha')->detach()['position']);
 
-        $this->QuantumObject = new Object(function(){ return ''; });
-
-        $alpha = &$this->QuantumObject->expose('alpha')->detach();
-        $this->assertSame($alpha, $this->QuantumObject->expose('alpha')->detach());
-
+        # primitives
+        $this->QuantumObject = new Object(function () { return ''; });
+        $alpha = &$this->QuantumObject->mount('alpha')->detach();
+        $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->detach());
         $alpha = 'first';
-        $this->assertSame($alpha, $this->QuantumObject->expose('alpha')->detach());
+        $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->detach());
     }
 
     /**
@@ -173,14 +175,15 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
      */
     public function factoryCanHaveArguments()
     {
-        $this->QuantumObject = new Object(function($x, $y){
+        $this->QuantumObject = new Object(function ($x, $y) {
             $point = new \stdClass;
             $point->x = $x;
             $point->y = $y;
+
             return $point;
         });
 
-        $this->QuantumObject->expose('A', [.1, .1]);
+        $this->QuantumObject->mount('A', [.1, .1]);
     }
 
     /**
@@ -189,10 +192,10 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
      */
     public function badFactoryCall()
     {
-        $this->QuantumObject = new Object(function($range){
+        $this->QuantumObject = new Object(function ($range) {
             return range(0, $range);
         });
 
-        $this->QuantumObject->expose('range_a', []);
+        $this->QuantumObject->mount('range_a', []);
     }
 }
