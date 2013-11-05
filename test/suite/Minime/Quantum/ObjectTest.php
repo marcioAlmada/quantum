@@ -28,9 +28,38 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
+     */
+    public function factoryCanHaveArguments()
+    {
+        $this->QuantumObject = new Object(function ($x, $y) {
+            $point = new \stdClass;
+            $point->x = $x;
+            $point->y = $y;
+
+            return $point;
+        });
+
+        $this->QuantumObject->mount('A', [.1, .1]);
+    }
+
+    /**
+     * @test
+     * @expectedException \PHPUnit_Framework_Error
+     */
+    public function factoryFailsWithWrongCall()
+    {
+        $this->QuantumObject = new Object(function ($range) {
+            return range(0, $range);
+        });
+
+        $this->QuantumObject->mount('range_a', []);
+    }
+
+    /**
+     * @test
      * @expectedException \UnderflowException
      */
-    public function detachFailsWhenStatesAreEmpty()
+    public function exposeMustFailWhenStatesAreEmpty()
     {
         $this->QuantumObject->expose();
     }
@@ -38,7 +67,38 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function exposeCreatesParallelInstances()
+    public function exposeReturnsReferences()
+    {
+        # structures
+        $alpha = $this->QuantumObject->mount('alpha')->expose();
+        $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->expose());
+
+        $alpha->position = 'first';
+        $this->assertSame($alpha->position, $this->QuantumObject->mount('alpha')->expose()->position);
+
+        # arrays
+        $this->QuantumObject = new Object(function () { return []; });
+
+        $alpha = &$this->QuantumObject->mount('alpha')->expose();
+        $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->expose());
+
+        $alpha['position'] = 'first';
+        $this->assertSame($alpha['position'], $this->QuantumObject->mount('alpha')->expose()['position']);
+
+        # primitives
+        $this->QuantumObject = new Object(function () { return 'foo'; });
+
+        $alpha = &$this->QuantumObject->mount('alpha')->expose();
+        $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->expose());
+
+        $alpha = 'first';
+        $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->expose());
+    }
+
+    /**
+     * @test
+     */
+    public function mountMustCreateParallelInstances()
     {
         $alpha = $this->QuantumObject->mount('alpha')->expose();
         $beta  = $this->QuantumObject->mount('beta')->expose();
@@ -48,7 +108,7 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function interactAffectsCurrentStateOnly()
+    public function interactOnlyAffectsCurrentState()
     {
         $alpha =
             $this->QuantumObject
@@ -78,7 +138,7 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function eachAffectsStateByReference()
+    public function eachAffectsStatesByReference()
     {
         $this->QuantumObject
             ->mount('alpha')
@@ -131,7 +191,7 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function eachCantTaintStatesIdentifiers()
+    public function eachCanNotAlterStatesIdentifiers()
     {
         $this->QuantumObject
         ->mount('alpha')
@@ -147,67 +207,7 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function detachReturnsReferences()
-    {
-        # structures
-        $alpha = $this->QuantumObject->mount('alpha')->expose();
-        $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->expose());
-
-        $alpha->position = 'first';
-        $this->assertSame($alpha->position, $this->QuantumObject->mount('alpha')->expose()->position);
-
-        # arrays
-        $this->QuantumObject = new Object(function () { return []; });
-
-        $alpha = &$this->QuantumObject->mount('alpha')->expose();
-        $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->expose());
-
-        $alpha['position'] = 'first';
-        $this->assertSame($alpha['position'], $this->QuantumObject->mount('alpha')->expose()['position']);
-
-        # primitives
-        $this->QuantumObject = new Object(function () { return 'foo'; });
-
-        $alpha = &$this->QuantumObject->mount('alpha')->expose();
-        $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->expose());
-
-        $alpha = 'first';
-        $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->expose());
-    }
-
-    /**
-     * @test
-     */
-    public function factoryCanHaveArguments()
-    {
-        $this->QuantumObject = new Object(function ($x, $y) {
-            $point = new \stdClass;
-            $point->x = $x;
-            $point->y = $y;
-
-            return $point;
-        });
-
-        $this->QuantumObject->mount('A', [.1, .1]);
-    }
-
-    /**
-     * @test
-     * @expectedException \PHPUnit_Framework_Error
-     */
-    public function badFactoryCall()
-    {
-        $this->QuantumObject = new Object(function ($range) {
-            return range(0, $range);
-        });
-
-        $this->QuantumObject->mount('range_a', []);
-    }
-
-    /**
-     * @test
-     */
-    public function extend()
+    public function extendShouldForkExistingState()
     {
         $alpha =
             $this->QuantumObject
@@ -234,12 +234,12 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
      * @expectedException \LogicException
      * @dataProvider badExtendCallDataProvider
      */
-    public function badExtendCall($mounted, $state, $base)
+    public function extendMustFailWithWrongCall($mounted, $state, $base)
     {
         $this->QuantumObject->mount($mounted)->extend($state, $base);
     }
 
-    public function badExtendCallDataProvider()
+    public function extendWrongCallDataProvider()
     {
         return [
             ['state_a', 'state_b', 'undefined_state'],
