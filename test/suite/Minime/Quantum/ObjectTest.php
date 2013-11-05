@@ -232,14 +232,14 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      * @expectedException \LogicException
-     * @dataProvider badExtendCallDataProvider
+     * @dataProvider wrongExtendCallDataProvider
      */
     public function extendMustFailWithWrongCall($mounted, $state, $base)
     {
         $this->QuantumObject->mount($mounted)->extend($state, $base);
     }
 
-    public function extendWrongCallDataProvider()
+    public function wrongExtendCallDataProvider()
     {
         return [
             ['state_a', 'state_b', 'undefined_state'],

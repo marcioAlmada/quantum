@@ -35,7 +35,7 @@ class Object
     /**
      * Switch to an existing state or create a new one based on an identifier
      * @param  string $state
-     * @return self
+     * @return Minime\Quantum\Object
      */
     public function mount($state, $args = [])
     {
@@ -49,7 +49,7 @@ class Object
 
     /**
      * Create a new state based on a previously mounted one
-     * @return self
+     * @return Minime\Quantum\Object
      */
     public function extend($state, $base)
     {
@@ -64,7 +64,7 @@ class Object
     /**
      * Modifies current states trhough a callback
      * @param  callable $callback
-     * @return self
+     * @return Minime\Quantum\Object
      */
     public function interact(callable $callback)
     {
@@ -76,7 +76,7 @@ class Object
     /**
      * Loop through all states applying a callback
      * @param  callable $callback
-     * @return self
+     * @return Minime\Quantum\Object
      */
     public function each(callable $callback)
     {
@@ -142,7 +142,6 @@ class Object
     /**
      * Points cursor to a given state
      * @param  strin $state
-     * @return void
      */
     protected function pick($state)
     {
@@ -153,7 +152,6 @@ class Object
      * Creates or overrides a given state
      * @param  string $state state identifier
      * @param  array  $args  args necessary to execute factory
-     * @return void
      */
     protected function initialize($state, $args = [])
     {
