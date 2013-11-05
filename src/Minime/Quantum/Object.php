@@ -33,13 +33,29 @@ class Object
     }
 
     /**
-     * Switch to an existing state or create a new one based on a identifier
+     * Switch to an existing state or create a new one based on an identifier
      * @param  string $state
-     * @return mixed
+     * @return self
      */
     public function mount($state, $args = [])
     {
-        if (!$this->has($state)) { $this->initialize($state, $args); }
+        if (!$this->has($state)) {
+            $this->initialize($state, $args);
+        }
+        $this->pick($state);
+
+        return $this;
+    }
+
+    /**
+     * Create a new state based on a previously mounted one
+     * @return self
+     */
+    public function extend($state, $base)
+    {
+        $this->validateExtendOrFail($state, $base);
+        $base = $this->states[$base];
+        $this->states[$state] = (is_object($base) ? clone($base) : $base);
         $this->pick($state);
 
         return $this;
@@ -64,7 +80,9 @@ class Object
      */
     public function each(callable $callback)
     {
-        foreach ($this->states as $identifier => &$state) { $callback->__invoke($identifier, $state); }
+        foreach ($this->states as $identifier => &$state) {
+            $callback->__invoke($identifier, $state);
+        }
 
         return $this;
     }
@@ -75,7 +93,9 @@ class Object
      */
     public function &detach()
     {
-        if (empty($this->states)) { throw new \UnderflowException('There are no states to detach.'); }
+        if (empty($this->states)) {
+            throw new \UnderflowException('There are no states to detach.');
+        }
 
         return $this->current;
     }
@@ -97,6 +117,26 @@ class Object
     public function has($state)
     {
         return in_array($state, $this->states());
+    }
+
+    protected function validateExtendOrFail($state, $base)
+    {
+        $this->validateStateExtendOrFail($state);
+        $this->validateBaseExtendOrFail($base);
+    }
+
+    protected function validateStateExtendOrFail($state)
+    {
+        if ( $this->has($state)) {
+            throw new \LogicException('Can not extend to an already existing state.');
+        }
+    }
+
+    protected function validateBaseExtendOrFail($base)
+    {
+        if (!$this->has($base) ) {
+            throw new \LogicException('Can not extend from an unexistant state.');
+        }
     }
 
     /**

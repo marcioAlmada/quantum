@@ -152,20 +152,25 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
         # structures
         $alpha = $this->QuantumObject->mount('alpha')->detach();
         $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->detach());
+
         $alpha->position = 'first';
         $this->assertSame($alpha->position, $this->QuantumObject->mount('alpha')->detach()->position);
 
         # arrays
         $this->QuantumObject = new Object(function () { return []; });
+
         $alpha = &$this->QuantumObject->mount('alpha')->detach();
         $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->detach());
+
         $alpha['position'] = 'first';
         $this->assertSame($alpha['position'], $this->QuantumObject->mount('alpha')->detach()['position']);
 
         # primitives
-        $this->QuantumObject = new Object(function () { return ''; });
+        $this->QuantumObject = new Object(function () { return 'foo'; });
+
         $alpha = &$this->QuantumObject->mount('alpha')->detach();
         $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->detach());
+
         $alpha = 'first';
         $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->detach());
     }
@@ -197,5 +202,48 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
         });
 
         $this->QuantumObject->mount('range_a', []);
+    }
+
+    /**
+     * @test
+     */
+    public function extend()
+    {
+        $alpha =
+            $this->QuantumObject
+                ->mount('alpha')
+                    ->interact(function ($letter) {
+                        $letter->position = 1;
+                    })
+                ->detach();
+        $beta =
+            $this->QuantumObject
+                ->extend('beta', 'alpha')
+                    ->interact(function ($letter) {
+                        $letter->position++;
+                    })
+            ->detach();
+
+        $this->assertSame(1, $alpha->position);
+        $this->assertSame(2, $beta->position);
+        $this->assertNotSame($alpha, $beta);
+    }
+
+    /**
+     * @test
+     * @expectedException \LogicException
+     * @dataProvider badExtendCallDataProvider
+     */
+    public function badExtendCall($mounted, $state, $base)
+    {
+        $this->QuantumObject->mount($mounted)->extend($state, $base);
+    }
+
+    public function badExtendCallDataProvider()
+    {
+        return [
+            ['state_a', 'state_b', 'undefined_state'],
+            ['state_a', 'state_a', 'state_b']
+        ];
     }
 }
