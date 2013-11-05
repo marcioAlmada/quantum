@@ -91,10 +91,10 @@ class Object
      * Returns current state reference
      * @return mixed
      */
-    public function &detach()
+    public function &expose()
     {
         if (empty($this->states)) {
-            throw new \UnderflowException('There are no states to detach.');
+            throw new \UnderflowException('There are no states to expose.');
         }
 
         return $this->current;

@@ -32,7 +32,7 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
      */
     public function detachFailsWhenStatesAreEmpty()
     {
-        $this->QuantumObject->detach();
+        $this->QuantumObject->expose();
     }
 
     /**
@@ -40,8 +40,8 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
      */
     public function exposeCreatesParallelInstances()
     {
-        $alpha = $this->QuantumObject->mount('alpha')->detach();
-        $beta  = $this->QuantumObject->mount('beta')->detach();
+        $alpha = $this->QuantumObject->mount('alpha')->expose();
+        $beta  = $this->QuantumObject->mount('beta')->expose();
         $this->assertNotSame($alpha, $beta);
     }
 
@@ -58,7 +58,7 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
                             $instance->foo = 'bar';
                         }
                     )
-                ->detach()
+                ->expose()
         ;
 
         $beta =
@@ -69,7 +69,7 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
                             $instance->foo = 'baz';
                         }
                     )
-                ->detach()
+                ->expose()
         ;
 
         $this->assertNotSame(json_encode($alpha), json_encode($beta));
@@ -98,8 +98,8 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
             })
         ;
 
-        $alpha = $this->QuantumObject->mount('alpha')->detach();
-        $beta  = $this->QuantumObject->mount('beta')->detach();
+        $alpha = $this->QuantumObject->mount('alpha')->expose();
+        $beta  = $this->QuantumObject->mount('beta')->expose();
 
         $this->assertSame($alpha->property, $beta->property);
     }
@@ -125,7 +125,7 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
             ->mount('beta') # back to beta
             ->each(function ($identifier, $state) {}) # just looping trough states
         ;
-        $this->assertEquals('second', $this->QuantumObject->detach()->position);
+        $this->assertEquals('second', $this->QuantumObject->expose()->position);
     }
 
     /**
@@ -150,29 +150,29 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
     public function detachReturnsReferences()
     {
         # structures
-        $alpha = $this->QuantumObject->mount('alpha')->detach();
-        $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->detach());
+        $alpha = $this->QuantumObject->mount('alpha')->expose();
+        $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->expose());
 
         $alpha->position = 'first';
-        $this->assertSame($alpha->position, $this->QuantumObject->mount('alpha')->detach()->position);
+        $this->assertSame($alpha->position, $this->QuantumObject->mount('alpha')->expose()->position);
 
         # arrays
         $this->QuantumObject = new Object(function () { return []; });
 
-        $alpha = &$this->QuantumObject->mount('alpha')->detach();
-        $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->detach());
+        $alpha = &$this->QuantumObject->mount('alpha')->expose();
+        $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->expose());
 
         $alpha['position'] = 'first';
-        $this->assertSame($alpha['position'], $this->QuantumObject->mount('alpha')->detach()['position']);
+        $this->assertSame($alpha['position'], $this->QuantumObject->mount('alpha')->expose()['position']);
 
         # primitives
         $this->QuantumObject = new Object(function () { return 'foo'; });
 
-        $alpha = &$this->QuantumObject->mount('alpha')->detach();
-        $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->detach());
+        $alpha = &$this->QuantumObject->mount('alpha')->expose();
+        $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->expose());
 
         $alpha = 'first';
-        $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->detach());
+        $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->expose());
     }
 
     /**
@@ -215,14 +215,14 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
                     ->interact(function ($letter) {
                         $letter->position = 1;
                     })
-                ->detach();
+                ->expose();
         $beta =
             $this->QuantumObject
                 ->extend('beta', 'alpha')
                     ->interact(function ($letter) {
                         $letter->position++;
                     })
-            ->detach();
+            ->expose();
 
         $this->assertSame(1, $alpha->position);
         $this->assertSame(2, $beta->position);
