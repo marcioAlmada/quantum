@@ -34,7 +34,7 @@ class Object
 
     /**
      * Switch to an existing state or create a new one based on an identifier
-     * @param  string $state
+     * @param  string                $state
      * @return Minime\Quantum\Object
      */
     public function mount($state, $args = [])
@@ -63,7 +63,7 @@ class Object
 
     /**
      * Modifies current states trhough a callback
-     * @param  callable $callback
+     * @param  callable              $callback
      * @return Minime\Quantum\Object
      */
     public function interact(callable $callback)
@@ -75,14 +75,14 @@ class Object
 
     /**
      * Loop through all states applying a callback
-     * @param  callable $callback
+     * @param  callable              $callback
      * @return Minime\Quantum\Object
      */
     public function each(callable $callback)
     {
-        foreach ($this->states as $identifier => &$state) {
-            $callback->__invoke($identifier, $state);
-        }
+        array_walk($this->states, function (&$state, $identifier) use ($callback) {
+          $callback->__invoke($identifier, $state);
+        });
 
         return $this;
     }
@@ -101,47 +101,24 @@ class Object
     }
 
     /**
-     * List all states available to mount
-     * @return array
-     */
-    public function states()
-    {
-       return array_keys($this->states);
-    }
-
-    /**
      * Checks if a given state already exists
      * @param  string  $state
      * @return boolean
      */
     public function has($state)
     {
-        return in_array($state, $this->states());
+        return in_array($state, array_keys($this->states));
     }
 
     protected function validateExtendOrFail($state, $base)
     {
-        $this->validateStateExtendOrFail($state);
-        $this->validateBaseExtendOrFail($base);
-    }
-
-    protected function validateStateExtendOrFail($state)
-    {
-        if ( $this->has($state)) {
-            throw new \LogicException('Can not extend to an already existing state.');
-        }
-    }
-
-    protected function validateBaseExtendOrFail($base)
-    {
-        if (!$this->has($base) ) {
-            throw new \LogicException('Can not extend from an unexistant state.');
-        }
+        if ( $this->has($state) ) throw new \LogicException('Can not extend to an already existing state.');
+        if (!$this->has($base)  ) throw new \LogicException('Can not extend from an unexistant state.');
     }
 
     /**
      * Points cursor to a given state
-     * @param  strin $state
+     * @param string $state
      */
     protected function pick($state)
     {
@@ -150,8 +127,8 @@ class Object
 
     /**
      * Creates or overrides a given state
-     * @param  string $state state identifier
-     * @param  array  $args  args necessary to execute factory
+     * @param string $state state identifier
+     * @param array  $args  args necessary to execute factory
      */
     protected function initialize($state, $args = [])
     {

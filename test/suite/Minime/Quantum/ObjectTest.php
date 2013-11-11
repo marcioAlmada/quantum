@@ -201,7 +201,9 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
                 $identifiers = 'delta';
         });
 
-        $this->assertSame(['alpha', 'beta', 'gama'], $this->QuantumObject->states());
+        $this->assertTrue($this->QuantumObject->has('alpha'));
+        $this->assertTrue($this->QuantumObject->has('beta'));
+        $this->assertTrue($this->QuantumObject->has('gama'));
     }
 
     /**
