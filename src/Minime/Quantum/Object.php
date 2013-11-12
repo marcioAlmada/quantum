@@ -51,14 +51,22 @@ class Object
      * Create a new state based on a previously mounted one
      * @return Minime\Quantum\Object
      */
-    public function extend($state, $base)
+    public function extend($new_state, $base_state)
     {
-        $this->validateExtendOrFail($state, $base);
-        $base = $this->states[$base];
-        $this->states[$state] = (is_object($base) ? clone($base) : $base);
-        $this->pick($state);
+        $this->validateExtendOrFail($new_state, $base_state);
+        $this->states[$new_state] = $this->forkState($this->states[$base_state]);
+        $this->pick($new_state);
 
         return $this;
+    }
+
+    protected function forkState($state)
+    {
+        if (is_object($state)) {
+            return clone($state);
+        }
+
+        return $state;
     }
 
     /**
@@ -112,8 +120,12 @@ class Object
 
     protected function validateExtendOrFail($state, $base)
     {
-        if ( $this->has($state) ) throw new \LogicException('Can not extend to an already existing state.');
-        if (!$this->has($base)  ) throw new \LogicException('Can not extend from an unexistant state.');
+        if ($this->has($state)) {
+            throw new \LogicException('Can not extend to an already existing state.');
+        }
+        if (!$this->has($base)) {
+            throw new \LogicException('Can not extend from an unexistant state.');
+        }
     }
 
     /**

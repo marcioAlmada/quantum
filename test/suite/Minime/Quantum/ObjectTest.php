@@ -69,7 +69,7 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
      */
     public function exposeReturnsReferences()
     {
-        # structures
+        # objects
         $alpha = $this->QuantumObject->mount('alpha')->expose();
         $this->assertSame($alpha, $this->QuantumObject->mount('alpha')->expose());
 
@@ -209,7 +209,7 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function extendShouldForkExistingState()
+    public function extendCanForkObjectState()
     {
         $alpha =
             $this->QuantumObject
@@ -228,6 +228,60 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(1, $alpha->position);
         $this->assertSame(2, $beta->position);
+        $this->assertNotSame($alpha, $beta);
+    }
+
+    /**
+     * @test
+     */
+    public function extendCanForkArrayState()
+    {
+        $this->QuantumObject = new Object(function () { return ['position'=>0]; });
+
+        $alpha =
+            $this->QuantumObject
+                ->mount('alpha')
+                    ->interact(function (&$letter) {
+                        $letter['position']++;
+                    })
+                ->expose();
+        $beta =
+            $this->QuantumObject
+                ->extend('beta', 'alpha')
+                    ->interact(function (&$letter) {
+                        $letter['position']++;
+                    })
+            ->expose();
+
+        $this->assertSame(1, $alpha['position']);
+        $this->assertSame(2, $beta['position']);
+        $this->assertNotSame($alpha, $beta);
+    }
+
+    /**
+     * @test
+     */
+    public function extendCanForkPrimitiveState()
+    {
+        $this->QuantumObject = new Object(function () { return 0; });
+
+        $alpha =
+            $this->QuantumObject
+                ->mount('alpha')
+                    ->interact(function (&$letter) {
+                        $letter++;
+                    })
+                ->expose();
+        $beta =
+            $this->QuantumObject
+                ->extend('beta', 'alpha')
+                    ->interact(function (&$letter) {
+                        $letter++;
+                    })
+            ->expose();
+
+        $this->assertSame(1, $alpha);
+        $this->assertSame(2, $beta);
         $this->assertNotSame($alpha, $beta);
     }
 
