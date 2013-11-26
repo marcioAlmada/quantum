@@ -12,3 +12,6 @@ Quantum is a very unique kind of container made to manage parallel states of dat
 
 - ~~[DONE]~~ Quantum Object
 - [TODO] Quantum Field
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/marcioAlmada/quantum/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
