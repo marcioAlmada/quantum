@@ -70,7 +70,7 @@ class Object
     }
 
     /**
-     * Modifies current states trhough a callback
+     * Modifies current states through a callback
      * @param  callable              $callback
      * @return Minime\Quantum\Object
      */
@@ -124,7 +124,7 @@ class Object
             throw new \LogicException('Can not extend to an already existing state.');
         }
         if (!$this->has($base)) {
-            throw new \LogicException('Can not extend from an unexistant state.');
+            throw new \LogicException('Can not extend from an inexistent state.');
         }
     }
 
@@ -140,10 +140,10 @@ class Object
     /**
      * Creates or overrides a given state
      * @param string $state state identifier
-     * @param array  $args  args necessary to execute factory
+     * @param array  $arguments  arguments necessary to call factory
      */
-    protected function initialize($state, $args = [])
+    protected function initialize($state, $arguments = [])
     {
-        $this->states[$state] = call_user_func_array($this->factory, $args);
+        $this->states[$state] = call_user_func_array($this->factory, $arguments);
     }
 }
