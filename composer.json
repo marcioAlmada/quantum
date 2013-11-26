@@ -1,8 +1,8 @@
 {
     "name": "minime/quantum",
     "type": "library",
-    "description": "Quantum is a library of unique data structures made to manage parallelism in a fluid and organized way.",
-    "keywords": ["php", "quantum", "container", "collection", "datatype", "parallel"],
+    "description": "Quantum is unique kind of container made to manage parallel states of data structures.",
+    "keywords": ["php", "quantum", "container", "collection", "data type", "parallel"],
     "license": "MIT",
     "authors": [
         {

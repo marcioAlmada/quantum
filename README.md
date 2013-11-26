@@ -6,12 +6,7 @@ Minime \ Quantum
 [![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/marcioAlmada/quantum/badges/quality-score.png?s=536d1003a7020d4c172976bff5233171c40f279f)](https://scrutinizer-ci.com/g/marcioAlmada/quantum/)
 
 
-Quantum is a very unique kind of container made to manage parallel states of data structures.
-
-## Features & Roadmap
-
-- ~~[DONE]~~ Quantum Object
-- [TODO] Quantum Field
+Quantum is unique kind of container made to manage parallel states of data structures.
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/marcioAlmada/quantum/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
