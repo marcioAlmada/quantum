@@ -6,7 +6,7 @@ Minime \ Quantum
 [![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/marcioAlmada/quantum/badges/quality-score.png?s=536d1003a7020d4c172976bff5233171c40f279f)](https://scrutinizer-ci.com/g/marcioAlmada/quantum/)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/1723710f-a54a-4f9e-94a8-d7f6ddb5faf1/mini.png)](https://insight.sensiolabs.com/projects/1723710f-a54a-4f9e-94a8-d7f6ddb5faf1)
 
-Quantum is unique kind of container made to manage parallel states of data structures. Give it a callable factory and see it unfold.
+Quantum is unique kind of container made to manage parallel states of data structures. Give it a callable factory and  start unfolding.
 
 ## Installation
 
@@ -17,10 +17,11 @@ Friends of terminal: `composer require minime/quantum:~0.0` :8ball:
 ```php
 <?php
 
-use Minime\Quantum\Object as Environment; // Quantum Object looks more expressive when aliased
+// Quantum Object looks more expressive when aliased
+use Minime\Quantum\Object as Container;
 
 // Quantum needs a callable to produce new states, so let's create one
-return (new Environment(function(){ return new FancyContainer(); }))
+$Container = (new Container(function(){ return new SomeFancyContainer(); }))
 
 // this is the default environment
 ->mount('default')->interact(function($container){
@@ -75,14 +76,14 @@ return (new Environment(function(){ return new FancyContainer(); }))
 ```php
 <?php
 
-$Environment->mount('test'); // switched to test environment
-$TestContainer  = $Environment->expose();
+// get test container
+$TestContainer  = $Container->mount('test')->expose();
 
-$Environment->mount('development'); // switched to development environment
-$DevelopmentContainer = $Environment->expose(); // voilla 
+// get development container
+$DevelopmentContainer = $Container->mount('development')->expose();
 
-$Environment->mount('production'); // switched to production environment
-$ProductionContainer = $Environment->expose(); // voilla
+// get production container
+$ProductionContainer = $Container->mount('production')->expose();
 
 ```
 
@@ -91,7 +92,7 @@ Interact with all states at once:
 ```php
 <?php
 
-$Enviroment->each(function($container){
+$Container->each(function($container){
     // routine
 });
 
