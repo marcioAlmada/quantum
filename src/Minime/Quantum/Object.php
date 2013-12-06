@@ -2,6 +2,13 @@
 
 namespace Minime\Quantum;
 
+/**
+ * A Quantum Object that allows parallel states of data structures
+ *
+ * @package Annotations
+ * @author  Márcio Almada and the Minime Community
+ * @license MIT
+ */
 class Object
 {
 
