@@ -41,13 +41,13 @@ class Object
 
     /**
      * Switch to an existing state or create a new one based on an identifier
-     * @param  string                $state
+     * @param  string                $state unique identifier
      * @return Minime\Quantum\Object
      */
-    public function mount($state, $args = [])
+    public function mount($state, array $args = null)
     {
         if (!$this->has($state)) {
-            $this->initialize($state, $args);
+            $this->initialize($state, (array) $args);
         }
         $this->pick($state);
 
